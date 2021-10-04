@@ -6,7 +6,7 @@ using Cosmos.System.FileSystem.VFS;
 using CosmosKernel1.Functions;
 using GUI;
 using System.Drawing;
-using Cosmos.System.Graphics;
+using CosmosKernel1.GUI;
 
 namespace CosmosKernel1
 {
@@ -14,52 +14,22 @@ namespace CosmosKernel1
     {
         private CosmosVFS fs;
 
-        private bool GUI;
-
-
         private Items.ProgressBar progressBar = new Items.ProgressBar('[', ']', '=', 100);
         //private Items.Spinner spinner = new Items.Spinner();
 
-        public static uint screenWidth = 1280;
-        public static uint screenHeight = 720;
-
-        public static DoubleBufferedVMWareSVGAII vMWareSVGAII;
-
-        int[] cursor = new int[]
-        {
-                1,0,0,0,0,0,0,0,0,0,0,0,
-                1,1,0,0,0,0,0,0,0,0,0,0,
-                1,2,1,0,0,0,0,0,0,0,0,0,
-                1,2,2,1,0,0,0,0,0,0,0,0,
-                1,2,2,2,1,0,0,0,0,0,0,0,
-                1,2,2,2,2,1,0,0,0,0,0,0,
-                1,2,2,2,2,2,1,0,0,0,0,0,
-                1,2,2,2,2,2,2,1,0,0,0,0,
-                1,2,2,2,2,2,2,2,1,0,0,0,
-                1,2,2,2,2,2,2,2,2,1,0,0,
-                1,2,2,2,2,2,2,2,2,2,1,0,
-                1,2,2,2,2,2,2,2,2,2,2,1,
-                1,2,2,2,2,2,2,1,1,1,1,1,
-                1,2,2,2,1,2,2,1,0,0,0,0,
-                1,2,2,1,0,1,2,2,1,0,0,0,
-                1,2,1,0,0,1,2,2,1,0,0,0,
-                1,1,0,0,0,0,1,2,2,1,0,0,
-                0,0,0,0,0,0,1,2,2,1,0,0,
-                0,0,0,0,0,0,0,1,1,0,0,0,
-        };
+        public GUIActivator Activator;
 
         protected override void BeforeRun()
         {
+            Activator = null;
 
-            GUI = false;
-
-            Console.WriteLine("Press Any key to start in GUI mode ");
+            Console.WriteLine("Press Any key to start in GUI mode !!");
             int s = 5;
             while (s >= 0)
             {
                 if (Console.KeyAvailable)
                 {
-                    GUI = true;
+                    Activator = new GUIActivator();
                     break;
                 }
                 Console.Write(s);
@@ -70,19 +40,9 @@ namespace CosmosKernel1
 
 
 
-            if (GUI)
+            if (Activator != null)
             {
-                // Start GUI
-                vMWareSVGAII = new DoubleBufferedVMWareSVGAII();
-                vMWareSVGAII.SetMode(screenWidth, screenHeight, 32);
-
-                // Initialize Mouse
-                Sys.MouseManager.ScreenWidth = screenWidth;
-                Sys.MouseManager.ScreenHeight = screenHeight;
-
-                Sys.MouseManager.X = screenWidth / 2;
-                Sys.MouseManager.Y = screenHeight / 2;
-
+                Activator.Initialize();
                 return;
             }
 
@@ -106,12 +66,9 @@ namespace CosmosKernel1
         }
         protected override void Run()
         {
-            if (GUI)
+            if (Activator != null)
             {
-                vMWareSVGAII.DoubleBuffer_Clear((uint)Color.Black.ToArgb());
-                DrawCursor(vMWareSVGAII, Sys.MouseManager.X, Sys.MouseManager.Y);
-                vMWareSVGAII.DoubleBuffer_Update();
-
+                Activator.Refresh();
                 return;
             }
 
@@ -212,24 +169,6 @@ namespace CosmosKernel1
                     break;
             }
 
-        }
-
-        public void DrawCursor(DoubleBufferedVMWareSVGAII driver, uint x, uint y)
-        {
-            for (uint h = 0; h < 19; h++)
-            {
-                for (uint w = 0; w < 12; w++)
-                {
-                    if (cursor[h * 12 + w] == 1)
-                    {
-                        driver.DoubleBuffer_SetPixel(w + x, h + y, (uint)Color.Black.ToArgb());
-                    }
-                    if (cursor[h * 12 + w] == 2)
-                    {
-                        driver.DoubleBuffer_SetPixel(w + x, h + y, (uint)Color.MediumPurple.ToArgb());
-                    }
-                }
-            }
         }
     }
 }
